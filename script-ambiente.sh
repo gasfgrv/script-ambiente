@@ -33,6 +33,7 @@ flatpak install flathub org.telegram.desktop
 flatpak install flathub nz.mega.MEGAsync
 flatpak install flathub org.onlyoffice.desktopeditors
 flatpak install flathub com.getpostman.Postman
+flatpak install flathub com.todoist.Todoist
 
 # SQL Server
 curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
