@@ -84,6 +84,9 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose -version
 
+#Heroku cli
+curl https://cli-assets.heroku.com/install.sh | sh
+
 cd /tmp
 
 wget -O discord.deb "https://discordapp.com/api/download?platform=linux&format=deb"
