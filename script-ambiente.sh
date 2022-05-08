@@ -32,7 +32,6 @@ sudo update-alternatives --config java
 java --version
 mvn --version
 
-
 # Gradle
 sudo add-apt-repository ppa:cwchien/gradle
 sudo apt update
@@ -132,6 +131,7 @@ Exec=/opt/freeplane-1.10.2/freeplane.sh
 Comment=Mindmap tool
 Terminal=false
 Icon=/opt/freeplane-1.10.2/freeplane.png
+Categories=Office
 Type=Application" >> ~/.local/share/applications/freeplane.desktop
 /opt/freeplane-1.10.2/freeplane.sh
 
