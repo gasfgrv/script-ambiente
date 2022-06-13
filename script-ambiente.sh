@@ -5,14 +5,8 @@ apt update
 apt upgrade -y
 
 # Flatpacks
-flatpak install flathub rest.insomnia.Insomnia -y
-flatpak run rest.insomnia.Insomnia &
 flatpak install flathub com.todoist.Todoist -y
 flatpak run com.todoist.Todoist &
-flatpak install flathub nz.mega.MEGAsync -y
-flatpak run nz.mega.MEGAsync &
-flatpak install flathub org.onlyoffice.desktopeditors -y
-flatpak run org.onlyoffice.desktopeditors &
 
 # Spotify
 curl -sS https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg | apt-key add - 
@@ -150,3 +144,20 @@ echo "export PATH=${PATH}:${M2_HOME}/bin" >> /etc/profile.d/maven.sh
 chmod +x /etc/profile.d/maven.sh
 source /etc/profile.d/maven.sh
 mvn --version
+
+# Insominia
+wget -O insomnia.deb https://github.com/Kong/insomnia/releases/download/core@2022.4.0/Insomnia.Core-2022.4.0.deb
+dpkg -i insomnia.deb
+Insominia &
+
+# Mega Sync
+wget -O megasync.deb https://mega.nz/linux/MEGAsync/xUbuntu_$(lsb_release -rs)/amd64/megasync-xUbuntu_$(lsb_release -rs)_amd64.deb
+wget -O nemo-megasync.deb https://mega.nz/linux/MEGAsync/xUbuntu_$(lsb_release -rs)/amd64/nemo-megasync-xUbuntu_$(lsb_release -rs)_amd64.deb 
+dpkg -i megasync.deb
+dpkg -i nemo-megasync.deb
+apt install -f
+megasync &
+
+wget -O onlyoffice.deb https://github.com/ONLYOFFICE/DesktopEditors/releases/download/v7.1.0/onlyoffice-desktopeditors_amd64.deb
+dpkg -i onlyoffice.deb
+onlyoffice &
