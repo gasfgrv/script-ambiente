@@ -1,163 +1,143 @@
 #!/bin/bash
 
-# Atualizar repositórios
-apt update
-apt upgrade -y
+cd /tmp || exit
 
-# Flatpacks
+# Atualizar repositórios
+sudo apt update
+sudo apt upgrade -y
+
+# Brave
+sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://brave-browser-apt-release.s3.brave.com/ stable main"|sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+sudo apt update
+sudo apt install brave-browser -y
+
+# Authy
+sudo mv /etc/apt/preferences.d/nosnap.pref ~/Documentos/nosnap.backup
+sudo apt update
+sudo apt install snapd -y
+sudo snap install authy
+cp /var/lib/snapd/desktop/applications/authy_authy.desktop ~/.local/share/applications/authy.desktop
+
+# OnlyOffice
+curl -o onlyoffice.deb "https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb?_ga=2.78753172.1483302472.1686753495-785392346.1686753495"
+sudo apt install ./onlyoffice.deb -y
+
+# Mega
+curl -o megasync.deb "https://mega.nz/linux/repo/xUbuntu_22.04/amd64/megasync-xUbuntu_22.04_amd64.deb"
+sudo apt install ./megasync.deb -y
+curl -o meganemo.deb "https://mega.nz/linux/repo/xUbuntu_22.04/amd64/nemo-megasync-xUbuntu_22.04_amd64.deb"
+sudo apt install ./meganemo.deb -y
+
+# Todoist
 flatpak install flathub com.todoist.Todoist -y
-flatpak run com.todoist.Todoist &
+
+# Bitwarden
+flatpak install flathub com.bitwarden.desktop -y
+
+# Discord
+curl -o discord.deb "https://dl.discordapp.net/apps/linux/0.0.27/discord-0.0.27.deb"
+sudo apt install ./discord.deb -y
+
+# Draw.io
+curl -o drawio.deb "https://github.com/jgraph/drawio-desktop/releases/download/v21.3.7/drawio-amd64-21.3.7.deb"
+sudo apt install ./drawio.deb -y
 
 # Spotify
-curl -sS https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg | apt-key add - 
-echo "deb http://repository.spotify.com stable non-free" | tee /etc/apt/sources.list.d/spotify.list
-apt update && apt install spotify-client -y
-spotify &
+curl -sS https://download.spotify.com/debian/pubkey_7A3A762FAFD4A51F.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+sudo apt update && sudo apt install spotify-client -y
 
-# WhatsApp, Tilix, VLC
-apt install whatsapp-desktop tilix vlc -y
-WhatsApp &
-tilix &
-vlc &
+# Whatsapp
+flatpak install flathub io.github.mimbrero.WhatsAppDesktop -y
 
-# Java
-apt install openjdk-11-jdk openjdk-17-jdk maven -y
-update-alternatives --config java
-java --version
+# Tilix
+sudo apt install tilix -y
+
+# VLC
+sudo apt install tilix vlc -y
+
+# Terraform
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(awk -F= 'NR==3 {print $2}' /etc/upstream-release/lsb-release) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install terraform
+
+# AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 
 # NodeJs e NPM
-apt install npm nodejs -y
-npm cache clean -f
-npm install -g n
-n stable
-node -v
-npm -v
+sudo apt install npm nodejs -y
+sudo npm cache clean -f
+sudo npm install -g n
+sudo n stable
 
-# SQL Server
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list)"
-apt-get update
-apt-get install -y mssql-server
-/opt/mssql/bin/mssql-conf setup
-systemctl status mssql-server --no-pager
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/msprod.list
-apt-get update 
-apt-get install mssql-tools unixodbc-dev
-echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
-echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
-source ~/.bashrc
+# JDK
+sudo apt install openjdk-17-jdk -y
+echo 'JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"' | sudo tee -a /etc/environment
+source /etc/environment
 
-#Maria DB
-apt update
-apt install mariadb-server -y
-mysql_secure_installation
-mariadb --version
+# Maven
+curl -o apache-maven-3.9.2-bin.tar.gz "https://dlcdn.apache.org/maven/maven-3/3.9.2/binaries/apache-maven-3.9.2-bin.tar.gz"
+tar -xvzf apache-maven-3.9.2-bin.tar.gz
+sudo cp -r apache-maven-3.9.2/ /opt/maven
+echo 'M2_HOME="/opt/maven"' | sudo tee -a /etc/environment
+echo 'MAVEN_HOME="/opt/maven"' | sudo tee -a /etc/environment
+source /etc/environment
+echo "export PATH=${M2_HOME}/bin:${PATH}" | sudo tee -a /etc/profile.d/maven.sh
+sudo chmod +x /etc/profile.d/maven.sh
+source /etc/profile.d/maven.sh
 
 # Docker
-apt update
-apt install apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-apt update
-apt install docker-ce -y
-usermod -aG docker ${USER}
-su - ${USER}
-id -nG
-docker container run --rm hello-world
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(awk -F= 'NR==3 {print $2}' /etc/upstream-release/lsb-release) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install docker-ce -y
+sudo usermod -aG docker "${USER}"
+sudo apt install docker-compose
 
-# Docker-Compose
-curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-docker-compose -version
+# .NET
+sudo apt install -y dotnet-sdk-6.0
 
-#Heroku cli
-curl https://cli-assets.heroku.com/install.sh | sh
+# Beekeeper
+wget -O beekeeper.deb "https://github.com/beekeeper-studio/beekeeper-studio/releases/download/v3.9.17/beekeeper-studio_3.9.17_amd64.deb"
+sudo apt install ./beekeeper.deb
 
-cd /tmp
+# Intellij
+wget -O ideaIC.tar.gz "https://download.jetbrains.com/idea/ideaIC-2023.1.2.tar.gz?_gl=1*om84dg*_ga*NjUwOTA3MzIuMTY4Njc4NTgyOQ..*_ga_9J976DJZ68*MTY4Njc4NTgyOS4xLjEuMTY4Njc4NTg0OS4wLjAuMA..&_ga=2.166788222.1771214203.1686785830-65090732.1686785829"
+tar -xvzf ideaIC.tar.gz
+sudo cp -r idea-IC-231.9011.34/ /opt/idea
+sudo chmod u+x /opt/idea
 
-wget -O discord.deb "https://discordapp.com/api/download?platform=linux&format=deb"
-dpkg -i discord.deb
-discord &
+# Insomnia
+wget -O insomnia.deb "https://github.com/Kong/insomnia/releases/download/core%402023.2.2/Insomnia.Core-2023.2.2.deb"
+sudo apt install ./insomnia.deb
 
-wget -O google-chrome.deb "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-dpkg -i google-chrome.deb
-google-chrome-stable &
-
-wget -O gitkraken.deb "https://release.gitkraken.com/linux/gitkraken-amd64.deb"
-dpkg -i gitkraken.deb
-gitkraken &
-
-wget -O ideaIC.tar.gz "https://download-cdn.jetbrains.com/idea/ideaIC-$(date +'%Y').1.tar.gz"
-tar xvf ideaIC.tar.gz
-mv idea-IC-213.6461.79/ /opt/idea
-chmod u+x /opt/idea
-/opt/idea/bin/idea.sh &
-
-wget -O spring-tool-suite.tar.gz "https://download.springsource.com/release/STS4/4.13.0.RELEASE/dist/e4.22/spring-tool-suite-4-4.13.0.RELEASE-e4.22.0-linux.gtk.x86_64.tar.gz"
-tar xvf spring-tool-suite.tar.gz
-mv sts-4.13.0.RELEASE/ /opt/spring
-chmod u+x /opt/spring
-/opt/spring/SpringToolSuite4 &
-
-wget -O code.deb "https://az764295.vo.msecnd.net/stable/899d46d82c4c95423fb7e10e68eba52050e30ba3/code_1.63.2-1639562499_amd64.deb"
-dpkg -i code.deb
-code &
-
-wget -O azureDataStudio.deb "https://go.microsoft.com/fwlink/?linkid=2169956"
-dpkg -i azureDataStudio.deb
-azureDataStudio &
-
-wget -O dbeaver.deb "https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb"
-dpkg -i dbeaver.deb
-dbeaver-ce &
-
-wget -O freeplane.zip "https://sourceforge.net/projects/freeplane/files/freeplane%20stable/freeplane_bin-1.10.2.zip/download"
-unzip freeplane.zip
-mv freeplane/ /opt/
+# Postman
+wget -O postman.tar.gz "https://dl.pstmn.io/download/latest/linux_64"
+tar -xvzf postman.tar.gz
+sudo cp -r Postman/ /opt/postman
 echo "[Desktop Entry]
-Name=Freeplane
-Exec=/opt/freeplane-1.10.2/freeplane.sh
-Comment=Mindmap tool
+Name=Postman
+Exec=/opt/postman/Postman
+Comment=API development environment
 Terminal=false
-Icon=/opt/freeplane-1.10.2/freeplane.png
-Categories=Office
-Type=Application" >> ~/.local/share/applications/freeplane.desktop
-/opt/freeplane-1.10.2/freeplane.sh &
+Icon=postman
+Type=Application" > ~/.local/share/applications/postman.desktop
 
-cd ~
-mkdir .ssh/
-ssh-keygen -t ed25519 -C "gustavo_almeida11@hotmail.com"
-ssh-add ~/.ssh/id_ed25519
-cat ~/.ssh/id_ed25519.pub
+# Pycharm
+wget -O pycharm.tar.gz "https://download.jetbrains.com/python/pycharm-community-2023.1.2.tar.gz?_gl=1*351jtj*_ga*NjUwOTA3MzIuMTY4Njc4NTgyOQ..*_ga_9J976DJZ68*MTY4Njc4NTgyOS4xLjEuMTY4Njc4NjM3My4wLjAuMA.."
+tar -xvzf pycharm.tar.gz
+sudo cp -r pycharm-community-2023.1.2/ /opt/pycharm
+sudo chmod u+x /opt/pycharm
 
-#Maven
-wget -O apache-maven.tar.gz "https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz"
-tar xvf apache-maven.tar.gz
-mv apache-maven-3.8.5/ /opt/maven
-echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> /etc/profile.d/maven.sh
-echo "export M2_HOME=/opt/maven" >> /etc/profile.d/maven.sh
-echo "export MAVEN_HOME=/opt/maven" >> /etc/profile.d/maven.sh
-chmod +x /etc/profile.d/maven.sh
-source /etc/profile.d/maven.sh
-echo "export PATH=${PATH}:${M2_HOME}/bin" >> /etc/profile.d/maven.sh
-chmod +x /etc/profile.d/maven.sh
-source /etc/profile.d/maven.sh
-mvn --version
+# VS Code
+wget -O vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
+sudo apt install vscode.deb
 
-# Insominia
-wget -O insomnia.deb https://github.com/Kong/insomnia/releases/download/core@2022.4.0/Insomnia.Core-2022.4.0.deb
-dpkg -i insomnia.deb
-Insominia &
-
-# Mega Sync
-wget -O megasync.deb https://mega.nz/linux/MEGAsync/xUbuntu_$(lsb_release -rs)/amd64/megasync-xUbuntu_$(lsb_release -rs)_amd64.deb
-wget -O nemo-megasync.deb https://mega.nz/linux/MEGAsync/xUbuntu_$(lsb_release -rs)/amd64/nemo-megasync-xUbuntu_$(lsb_release -rs)_amd64.deb 
-dpkg -i megasync.deb
-dpkg -i nemo-megasync.deb
-apt install -f
-megasync &
-
-wget -O onlyoffice.deb https://github.com/ONLYOFFICE/DesktopEditors/releases/download/v7.1.0/onlyoffice-desktopeditors_amd64.deb
-dpkg -i onlyoffice.deb
-onlyoffice &
+# Procurar por atualizações
+sudo apt update
+sudo apt upgrade -y
