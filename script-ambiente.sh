@@ -32,8 +32,12 @@ sudo apt install ./meganemo.deb -y
 # Todoist
 flatpak install flathub com.todoist.Todoist -y
 
+# Safe Eyes
+flatpak install flathub io.github.slgobinath.SafeEyes -y
+
 # Bitwarden
-flatpak install flathub com.bitwarden.desktop -y
+wget -O bitwarden.deb "https://vault.bitwarden.com/download/?app=desktop&platform=linux&variant=deb"
+sudo apt install ./bitwarden.deb
 
 # Discord
 curl -o discord.deb "https://dl.discordapp.net/apps/linux/0.0.27/discord-0.0.27.deb"
@@ -97,7 +101,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docke
 sudo apt update
 sudo apt install docker-ce -y
 sudo usermod -aG docker "${USER}"
-sudo apt install docker-compose
+sudo apt install docker-compose -y
 
 # .NET
 sudo apt install -y dotnet-sdk-6.0
@@ -136,7 +140,7 @@ sudo chmod u+x /opt/pycharm
 
 # VS Code
 wget -O vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64"
-sudo apt install vscode.deb
+sudo apt install ./vscode.deb
 
 # Procurar por atualizações
 sudo apt update
